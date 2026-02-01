@@ -29,3 +29,25 @@ class About(models.Model):
 
     def __str__(self):
         return self.heading
+    
+class Experience(models.Model):
+    role = models.CharField(max_length=100)
+    company = models.CharField(max_length=100)
+    start_date = models.CharField(max_length=20)
+    end_date = models.CharField(max_length=20, blank=True)
+    description = models.TextField()
+    order = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.role} @ {self.company}"
+
+
+class Education(models.Model):
+    degree = models.CharField(max_length=100)
+    institution = models.CharField(max_length=150)
+    year = models.CharField(max_length=20)
+    description = models.TextField(blank=True)
+    order = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.degree
