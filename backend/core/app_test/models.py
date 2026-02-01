@@ -20,3 +20,12 @@ class Skill(models.Model):
 
     def __str__(self):
         return self.name
+    
+class About(models.Model):
+    heading = models.CharField(max_length=100, default="About Me")
+    body = models.TextField(
+        help_text="Write in paragraphs. Line breaks will be preserved."
+    )
+
+    def __str__(self):
+        return self.heading

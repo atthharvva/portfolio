@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Profile, Skill
+from .models import About, Profile, Skill
 
 # Create your views here.
 def landing_page(request):
@@ -8,7 +8,10 @@ def landing_page(request):
 def home(request):
     profile = Profile.objects.first()
     skills = Skill.objects.all()
+    about = About.objects.first()
+    
     return render(request, "core.html", {
         "profile": profile,
-        "skills": skills
+        "skills": skills,
+        "about": about
     })

@@ -9,12 +9,12 @@
 </head>
 
 <!-- <body class="bg-red-500 text-white text-4xl"> -->
-<body class="bg-red-500 text-white text-4xl">
+<body class="bg-red-600 text-white text-4xl">
 
 
 <!-- Background Glow -->
 <div class="absolute top-[-200px] left-[-200px] w-[500px] h-[500px] bg-purple-600/30 rounded-full blur-[120px]"></div>
-<div class="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] bg-cyan-500/20 rounded-full blur-[120px]"></div>
+<!-- <div class="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] bg-cyan-500/20 rounded-full blur-[120px]"></div> -->
 
 <!-- Hero Section -->
 <section class="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
@@ -81,6 +81,29 @@
           LinkedIn
         </a>
       {% endif %}
+    </div>
+
+  </div>
+</section>
+
+<section id="about" class="relative py-24 px-6">
+  <div class="max-w-4xl mx-auto">
+
+    <!-- Section heading -->
+    <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+      {{ about.heading }}
+    </h2>
+
+    <!-- Divider -->
+    <div class="mt-4 h-1 w-20 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-full"></div>
+
+    <!-- Content -->
+    <div class="mt-8 space-y-6 text-slate-300 text-base sm:text-lg leading-relaxed">
+      {% for paragraph in about.body.splitlines %}
+        {% if paragraph %}
+          <p>{{ paragraph }}</p>
+        {% endif %}
+      {% endfor %}
     </div>
 
   </div>
