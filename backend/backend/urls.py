@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('landing/', views.landing_page, name='landing'),
     path('', views.home, name='home'),
+    path('api/contact/', views.contact_form, name='contact_form'),
 ]
