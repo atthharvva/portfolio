@@ -15,11 +15,11 @@ class Profile(models.Model):
         return self.full_name
 
 
-class Skill(models.Model):
-    name = models.CharField(max_length=50)
+# class Skill(models.Model):
+#     name = models.CharField(max_length=50)
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
     
 class About(models.Model):
     heading = models.CharField(max_length=100, default="About Me")
@@ -51,3 +51,25 @@ class Education(models.Model):
 
     def __str__(self):
         return self.degree
+    
+class Skill(models.Model):
+    CATEGORY_CHOICES = [
+        ("backend", "Backend"),
+        ("frontend", "Frontend"),
+        ("database", "Database"),
+        ("tools", "Tools"),
+        ("languages", "Languages"),
+        ("frameworks", "Frameworks"),
+        ("concepts", "Concepts"),
+        ("ai_ml", "AI & ML"),
+        ("devops", "DevOps"),
+        ("security", "Security"),
+    ]
+
+    name = models.CharField(max_length=50)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, blank=True)
+    level = models.IntegerField(help_text="Skill level from 1 to 100", blank=True, null=True)
+    order = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.name
