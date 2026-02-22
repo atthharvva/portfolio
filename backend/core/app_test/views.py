@@ -2,12 +2,12 @@ from collections import defaultdict
 import json
 import resend
 from urllib import response
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 
 from django.conf import settings
-from .models import About, Profile, Skill, Experience, Education, Contact
+from .models import About, Profile, Skill, Experience, Education, Contact, Meal, Ingredient, Instruction
 
 # Create your views here.
 def landing_page(request):
@@ -104,3 +104,65 @@ def contact_form(request):
             'status': 'error',
             'message': str(e)
         }, status=400)
+    
+def gymbuddy(request):
+    return render(request, 'gymbuddy.html')
+
+def meal_prep_portal(request):
+    """
+    Main meal prep portal - diet selection page
+    """
+    return render(request, 'meal_prep_portal.html')
+
+
+def meal_list(request, diet_type, meal_category):
+    """
+    Display list of meals for selected diet and category
+    """
+    # Get all meals matching the criteria
+    meals = Meal.objects.filter(
+        diet_type=diet_type,
+        category=meal_category,
+        is_active=True
+    ).prefetch_related('ingredients', 'instructions', 'tips')
+    
+    # Get display names
+    diet_display = dict(Meal.DIET_CHOICES).get(diet_type, diet_type.title())
+    category_display = dict(Meal.CATEGORY_CHOICES).get(meal_category, meal_category.title())
+    
+    # Get diet icon
+    diet_icons = {
+        'vegetarian': '🥬',
+        'nonvegetarian': '🍖',
+        'vegan': '🌱'
+    }
+    
+    context = {
+        'meals': meals,
+        'diet_type': diet_type,
+        'meal_category': meal_category,
+        'diet_display': diet_display,
+        'category_display': category_display,
+        'diet_icon': diet_icons.get(diet_type, '🍽️'),
+    }
+    return render(request, 'meal_list.html', context)
+
+
+def meal_detail(request, meal_id):
+    """
+    Display detailed view of a specific meal with recipe, instructions, and video
+    """
+    meal = get_object_or_404(Meal, id=meal_id, is_active=True)
+    
+    # Get all related data
+    ingredients = meal.ingredients.all()
+    instructions = meal.instructions.all()
+    tips = meal.tips.all()
+    
+    context = {
+        'meal': meal,
+        'ingredients': ingredients,
+        'instructions': instructions,
+        'tips': tips,
+    }
+    return render(request, 'meal_detail.html', context)

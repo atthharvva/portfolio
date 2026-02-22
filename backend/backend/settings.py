@@ -126,7 +126,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_DIRS = [
+    BASE_DIR / 'core/app_test/static',
+]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 RESEND_API_KEY = os.getenv('RESEND_API_KEY')
+
+# Media files (uploaded images)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

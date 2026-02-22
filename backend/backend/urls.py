@@ -17,10 +17,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from core.app_test import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('landing/', views.landing_page, name='landing'),
     path('', views.home, name='home'),
     path('api/contact/', views.contact_form, name='contact_form'),
-]
+    path('gymbuddy/', views.gymbuddy, name='gymbuddy'),
+    path('gymbuddy/mealPrep/', views.meal_prep_portal, name='meal_prep_portal'),
+    path('gymbuddy/mealPrep/<str:diet_type>/<str:meal_category>/', views.meal_list, name='meal_list'),
+    path('gymbuddy/meal/<int:meal_id>/', views.meal_detail, name='meal_detail'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

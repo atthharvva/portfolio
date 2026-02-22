@@ -1,0 +1,530 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meal Prep Portal - GymBuddy</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+<style>
+
+/* ========== GRADIENT ANIMATIONS ========== */
+
+@keyframes gradientMove {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.gradient-text {
+  background-size: 300% 300%;
+  animation: gradientMove 8s ease infinite;
+}
+
+/* ========== FLOATING BLOBS ========== */
+
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(140px);
+  opacity: 0.4;
+  animation: float 20s infinite ease-in-out;
+  pointer-events: none;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(30px, -50px) rotate(120deg); }
+  66% { transform: translate(-20px, 30px) rotate(240deg); }
+}
+
+/* ========== DIET CARD HOVER ========== */
+
+.diet-card {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+}
+
+.diet-card:hover {
+  transform: translateY(-20px) scale(1.05);
+  box-shadow: 0 30px 80px rgba(99, 102, 241, 0.4);
+}
+
+.diet-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.diet-card:hover::before {
+  opacity: 1;
+}
+
+/* ========== MEAL CATEGORY CARD ========== */
+
+.meal-category {
+  transition: all 0.4s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.meal-category:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
+}
+
+.meal-category::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.meal-category:hover::after {
+  left: 100%;
+}
+
+/* ========== BACK BUTTON ========== */
+
+.back-button {
+  position: fixed;
+  top: 30px;
+  left: 30px;
+  z-index: 100;
+  padding: 12px 24px;
+  background: rgba(30, 41, 59, 0.95);
+  border: 2px solid rgba(99, 102, 241, 0.3);
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.5);
+  transform: translateX(-5px);
+}
+
+/* ========== PROGRESS BAR ========== */
+
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4);
+  z-index: 9999;
+  transform-origin: left;
+}
+
+/* ========== PAGE TRANSITIONS ========== */
+
+.page {
+  display: none;
+  animation: fadeIn 0.5s ease;
+}
+
+.page.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== MEAL GRID ========== */
+
+.meal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+</style>
+
+</head>
+
+<body class="bg-slate-950 text-slate-200 antialiased overflow-x-hidden">
+
+<!-- ========== SCROLL PROGRESS BAR ========== -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ========== BACKGROUND BLOBS ========== -->
+<div class="blob w-[600px] h-[600px] bg-purple-600 top-[-200px] left-[-200px]"></div>
+<div class="blob w-[500px] h-[500px] bg-cyan-500 bottom-[-200px] right-[-200px]"></div>
+<div class="blob w-[400px] h-[400px] bg-indigo-500 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style="opacity: 0.2;"></div>
+
+<!-- ========== BACK BUTTON ========== -->
+<a href="/gymbuddy/" class="back-button flex items-center gap-2 text-white font-semibold">
+  <span>←</span>
+  <span>Back to GymBuddy</span>
+</a>
+
+
+<!-- ========================================
+     PAGE 1: DIET TYPE SELECTION
+     ======================================== -->
+<div id="dietSelectionPage" class="page active">
+  
+  <section class="min-h-screen flex items-center justify-center px-6 relative z-10 pt-20">
+    <div class="max-w-6xl w-full">
+
+      <!-- Header -->
+      <div class="text-center mb-16" data-aos="fade-up">
+        <h1 class="text-6xl sm:text-7xl font-extrabold mb-6">
+          <span class="gradient-text bg-gradient-to-r from-green-400 via-emerald-400 to-cyan-400 
+                       bg-clip-text text-transparent">
+            Meal Prep Portal
+          </span>
+        </h1>
+        <p class="text-2xl text-slate-300">Choose your dietary preference</p>
+        <p class="mt-4 text-slate-400">Personalized meal plans crafted just for you</p>
+      </div>
+
+      <!-- Diet Type Cards -->
+      <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+
+        <!-- Vegetarian -->
+        <div class="diet-card relative p-10 rounded-3xl border-2 border-white/10 backdrop-blur-sm
+                    bg-gradient-to-br from-green-500/10 to-emerald-500/10
+                    hover:border-green-400/50"
+             data-aos="fade-up" data-aos-delay="100"
+             onclick="selectDiet('vegetarian')">
+          
+          <div class="text-center">
+            <!-- Icon -->
+            <div class="w-32 h-32 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-green-500 to-emerald-600 
+                        flex items-center justify-center text-7xl shadow-2xl">
+              🥬
+            </div>
+
+            <!-- Title -->
+            <h3 class="text-3xl font-bold text-white mb-4">Vegetarian</h3>
+
+            <!-- Description -->
+            <p class="text-slate-300 mb-6 leading-relaxed">
+              Plant-based meals with dairy and eggs. Balanced nutrition for your fitness goals.
+            </p>
+
+            <!-- Stats -->
+            <div class="flex justify-center gap-6 text-sm">
+              <div>
+                <div class="font-bold text-green-400">20+</div>
+                <div class="text-slate-400">Recipes</div>
+              </div>
+              <div>
+                <div class="font-bold text-green-400">High</div>
+                <div class="text-slate-400">Protein</div>
+              </div>
+            </div>
+
+            <!-- Arrow -->
+            <div class="mt-6 text-4xl text-green-400 transform transition-transform group-hover:translate-x-2">
+              →
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Non-Vegetarian -->
+        <div class="diet-card relative p-10 rounded-3xl border-2 border-white/10 backdrop-blur-sm
+                    bg-gradient-to-br from-orange-500/10 to-red-500/10
+                    hover:border-orange-400/50"
+             data-aos="fade-up" data-aos-delay="200"
+             onclick="selectDiet('nonvegetarian')">
+          
+          <div class="text-center">
+            <!-- Icon -->
+            <div class="w-32 h-32 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-orange-500 to-red-600 
+                        flex items-center justify-center text-7xl shadow-2xl">
+              🍖
+            </div>
+
+            <!-- Title -->
+            <h3 class="text-3xl font-bold text-white mb-4">Non-Vegetarian</h3>
+
+            <!-- Description -->
+            <p class="text-slate-300 mb-6 leading-relaxed">
+              Protein-rich meals with chicken, fish, and meat. Perfect for muscle building.
+            </p>
+
+            <!-- Stats -->
+            <div class="flex justify-center gap-6 text-sm">
+              <div>
+                <div class="font-bold text-orange-400">25+</div>
+                <div class="text-slate-400">Recipes</div>
+              </div>
+              <div>
+                <div class="font-bold text-orange-400">Very High</div>
+                <div class="text-slate-400">Protein</div>
+              </div>
+            </div>
+
+            <!-- Arrow -->
+            <div class="mt-6 text-4xl text-orange-400">
+              →
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Vegan -->
+        <div class="diet-card relative p-10 rounded-3xl border-2 border-white/10 backdrop-blur-sm
+                    bg-gradient-to-br from-purple-500/10 to-pink-500/10
+                    hover:border-purple-400/50"
+             data-aos="fade-up" data-aos-delay="300"
+             onclick="selectDiet('vegan')">
+          
+          <div class="text-center">
+            <!-- Icon -->
+            <div class="w-32 h-32 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-purple-500 to-pink-600 
+                        flex items-center justify-center text-7xl shadow-2xl">
+              🌱
+            </div>
+
+            <!-- Title -->
+            <h3 class="text-3xl font-bold text-white mb-4">Vegan</h3>
+
+            <!-- Description -->
+            <p class="text-slate-300 mb-6 leading-relaxed">
+              100% plant-based nutrition. Clean, ethical eating with complete protein sources.
+            </p>
+
+            <!-- Stats -->
+            <div class="flex justify-center gap-6 text-sm">
+              <div>
+                <div class="font-bold text-purple-400">18+</div>
+                <div class="text-slate-400">Recipes</div>
+              </div>
+              <div>
+                <div class="font-bold text-purple-400">Plant</div>
+                <div class="text-slate-400">Based</div>
+              </div>
+            </div>
+
+            <!-- Arrow -->
+            <div class="mt-6 text-4xl text-purple-400">
+              →
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+
+<!-- ========================================
+     PAGE 2: MEAL CATEGORIES (BREAKFAST, LUNCH, DINNER)
+     ======================================== -->
+<div id="mealCategoriesPage" class="page">
+  
+  <section class="min-h-screen flex items-center justify-center px-6 relative z-10 pt-20 pb-20">
+    <div class="max-w-6xl w-full">
+
+      <!-- Header with Selected Diet -->
+      <div class="text-center mb-16" data-aos="fade-up">
+        
+        <!-- Badge showing selected diet -->
+        <div class="inline-block px-6 py-3 rounded-full bg-white/10 border border-white/20 
+                    backdrop-blur-xl mb-6">
+          <span class="text-lg" id="selectedDietIcon">🥬</span>
+          <span class="text-lg font-semibold ml-2" id="selectedDietName">Vegetarian</span>
+        </div>
+
+        <h1 class="text-5xl sm:text-6xl font-extrabold mb-4">
+          <span class="gradient-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 
+                       bg-clip-text text-transparent">
+            Choose Your Meal
+          </span>
+        </h1>
+        <p class="text-xl text-slate-300">Select a category to explore recipes</p>
+      </div>
+
+      <!-- Meal Category Cards -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+        <!-- Breakfast -->
+        <div class="meal-category p-8 rounded-3xl border-2 border-white/10 backdrop-blur-sm
+                    bg-gradient-to-br from-yellow-500/10 to-orange-500/10
+                    hover:border-yellow-400/50 text-center"
+             data-aos="fade-up" data-aos-delay="100"
+             onclick="goToMealList('breakfast')">
+          
+          <div class="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-yellow-500 to-orange-600 
+                      flex items-center justify-center text-6xl shadow-lg">
+            🍳
+          </div>
+
+          <h3 class="text-2xl font-bold text-white mb-3">Breakfast</h3>
+          <p class="text-slate-400 text-sm mb-4">Start your day right</p>
+          <div class="text-yellow-400 font-semibold">5 Recipes</div>
+        </div>
+
+        <!-- Lunch -->
+        <div class="meal-category p-8 rounded-3xl border-2 border-white/10 backdrop-blur-sm
+                    bg-gradient-to-br from-green-500/10 to-emerald-500/10
+                    hover:border-green-400/50 text-center"
+             data-aos="fade-up" data-aos-delay="200"
+             onclick="goToMealList('lunch')">
+          
+          <div class="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 
+                      flex items-center justify-center text-6xl shadow-lg">
+            🥗
+          </div>
+
+          <h3 class="text-2xl font-bold text-white mb-3">Lunch</h3>
+          <p class="text-slate-400 text-sm mb-4">Power through your day</p>
+          <div class="text-green-400 font-semibold">5 Recipes</div>
+        </div>
+
+        <!-- Dinner -->
+        <div class="meal-category p-8 rounded-3xl border-2 border-white/10 backdrop-blur-sm
+                    bg-gradient-to-br from-blue-500/10 to-cyan-500/10
+                    hover:border-blue-400/50 text-center"
+             data-aos="fade-up" data-aos-delay="300"
+             onclick="goToMealList('dinner')">
+          
+          <div class="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 
+                      flex items-center justify-center text-6xl shadow-lg">
+            🍽️
+          </div>
+
+          <h3 class="text-2xl font-bold text-white mb-3">Dinner</h3>
+          <p class="text-slate-400 text-sm mb-4">End your day strong</p>
+          <div class="text-blue-400 font-semibold">5 Recipes</div>
+        </div>
+
+        <!-- Snacks/Additional Meals -->
+        <div class="meal-category p-8 rounded-3xl border-2 border-white/10 backdrop-blur-sm
+                    bg-gradient-to-br from-purple-500/10 to-pink-500/10
+                    hover:border-purple-400/50 text-center"
+             data-aos="fade-up" data-aos-delay="400"
+             onclick="goToMealList('snacks')">
+          
+          <div class="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 
+                      flex items-center justify-center text-6xl shadow-lg">
+            🍪
+          </div>
+
+          <h3 class="text-2xl font-bold text-white mb-3">Snacks</h3>
+          <p class="text-slate-400 text-sm mb-4">Healthy fuel between meals</p>
+          <div class="text-purple-400 font-semibold">5 Recipes</div>
+        </div>
+
+      </div>
+
+      <!-- Back to Diet Selection -->
+      <div class="text-center mt-16" data-aos="fade-up">
+        <button onclick="backToDietSelection()" 
+                class="px-8 py-4 rounded-xl border-2 border-white/30
+                       hover:bg-white/10 hover:border-white/50 hover:scale-105
+                       transition-all duration-300 backdrop-blur-sm">
+          ← Change Diet Type
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+
+<!-- ========== JAVASCRIPT ========== -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<script>
+
+// Initialize AOS
+AOS.init({
+  duration: 1000,
+  once: true,
+  offset: 100,
+  easing: 'ease-out-cubic'
+});
+
+// Scroll Progress Bar
+window.addEventListener('scroll', () => {
+  const winScroll = document.documentElement.scrollTop;
+  const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  const scrolled = (winScroll / height) * 100;
+  document.getElementById('progressBar').style.width = scrolled + '%';
+});
+
+// Store selected diet
+let selectedDiet = '';
+
+// Diet icons and names mapping
+const dietData = {
+  vegetarian: { icon: '🥬', name: 'Vegetarian' },
+  nonvegetarian: { icon: '🍖', name: 'Non-Vegetarian' },
+  vegan: { icon: '🌱', name: 'Vegan' }
+};
+
+// Select diet and go to meal categories
+function selectDiet(diet) {
+  selectedDiet = diet;
+  
+  // Update the badge on meal categories page
+  document.getElementById('selectedDietIcon').textContent = dietData[diet].icon;
+  document.getElementById('selectedDietName').textContent = dietData[diet].name;
+  
+  // Hide diet selection page
+  document.getElementById('dietSelectionPage').classList.remove('active');
+  
+  // Show meal categories page
+  setTimeout(() => {
+    document.getElementById('mealCategoriesPage').classList.add('active');
+    window.scrollTo(0, 0);
+    AOS.refresh();
+  }, 100);
+}
+
+// Go back to diet selection
+function backToDietSelection() {
+  document.getElementById('mealCategoriesPage').classList.remove('active');
+  
+  setTimeout(() => {
+    document.getElementById('dietSelectionPage').classList.add('active');
+    window.scrollTo(0, 0);
+    AOS.refresh();
+  }, 100);
+}
+
+// Go to meal list (will implement next)
+function goToMealList(mealType) {
+  // TODO: Navigate to meal list page
+  // For now, just redirect to Django view
+  window.location.href = `/gymbuddy/mealPrep/${selectedDiet}/${mealType}/`;
+}
+
+</script>
+
+</body>
+</html>
